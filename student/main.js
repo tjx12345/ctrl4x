@@ -26,33 +26,47 @@ let address = ip.address()
 //导入配置
 const {server_host,server_port} = require('../config');
 
-function recodeStuComment(status){
+let teacherId;
+
+ipcMain.on('save-teacher', (event, arg) => {
+  teacherId = arg;  
+})
+
+
+
+
+function recordStuComment(status){
   let date = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
   let commentStatus = status? '1':'0';
+
   let postData = {
-    comment:{
-       time:date,
-       info:commentStatus,
-    },
-    stuAddr:address
+    time:date,
+    info:commentStatus,
+    stuAddr:address,
+    teacherId,
+    date:moment(new Date()).format('YYYY-MM-DD')
   };
+  console.log(`${server_host}:${server_port}/infos`);
   axios.post(`${server_host}:${server_port}/infos`,postData)
   .then(res=>{
+    
+  
+
     let contents = mainWindow.webContents;
-    contents.send('showLogs',date + '记录一次'+ (status?'清楚':'不懂'));
+    contents.send('showLogs',date + '记录一次'+teacherId+ (status?'清楚':'不懂'));
   })
   .catch(err => console.log(err) );
 }
 
 function createWindow () {
   let ret = globalShortcut.register('CommandOrControl+Down',()=>{
-      recodeStuComment(false);
+      recordStuComment(false);
   });
   if (!ret) {
     console.log('registration failed')
   }
   ret = globalShortcut.register('CommandOrControl+Up',()=>{
-      recodeStuComment(true);
+      recordStuComment(true);
   });
   
   if (!ret) {
@@ -72,8 +86,14 @@ function createWindow () {
 
 
 
+
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
+
+
+
+
+
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

@@ -7,3 +7,9 @@ ipcRenderer.on('showLogs',(event, args)=>{
   let ul = document.getElementById('txt');
   ul.innerHTML += '<li>' + args + '</li>';
 })
+
+document.getElementById('btn').onclick = function(){
+  let val = document.getElementById('t').value;
+  console.log('aaaaa')
+  ipcRenderer.send('save-teacher',val);
+}

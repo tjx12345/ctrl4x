@@ -5,8 +5,7 @@ const config = require('../config');
 
 const today = moment().format('YYYY-MM-DD') + ' ' + config.scheduleTime;
 schedule.scheduleJob(new Date(today), function(){  
-  console.log('send')
-   axios.post(`${config.server_host}:${config.server_port}/recode`,require(config.record))
+   axios.post(`${config.server_host}:${config.server_port}/records`,require(config.record))
    .then(res=>{
     console.log(res)
    })

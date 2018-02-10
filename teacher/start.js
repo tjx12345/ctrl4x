@@ -10,8 +10,14 @@ const config = require('../config.js');
 
 //启动调度器
 require('./mySchedule.js');
+try{
+  fs.accessSync(config.audio_path);
+}catch(e) {
+  fs.mkdirSync(config.audio_path);
+}
 
-var watcher = chokidar.watch('./audio', {
+
+var watcher = chokidar.watch(config.audio_path, {
   persistent: true
 });
  
@@ -54,7 +60,6 @@ watcher
               let second = (new Date(fileLastModify) - beginTime) / 1000;
               //保存数据到文件
               let data = {
-                teacher:'凃俊雄',
                 second,
                 begin:beginTime,
                 end:fileLastModify,
@@ -62,17 +67,21 @@ watcher
               }
               //如果second计算失败则不向文件写入
               if(!second)return;
-              let postKey = '凃俊雄'+'_'+ today;
-              let postArr = { [postKey]:[]};
+              let postData = {};
+              postData.name = '凃俊雄';
+              postData.time = today;
+              postData.course = [];
+
+              //要么被赋值
               try{
-                  postArr[postKey] = JSON.parse(require('fs').readFileSync(config.record))[postKey]
+                  postData = JSON.parse(require('fs').readFileSync(config.record));
               }catch(e){
-                console.log(e);
+                  console.log(e);
                   console.log('读取数据json文件失败');
               }
               //追加数据
-              postArr[postKey].push(data);
-              require('fs').writeFile(config.record,JSON.stringify(postArr),err=>{
+              postData.course.push(data);
+              require('fs').writeFile(config.record,JSON.stringify(postData),err=>{
                   if(err) throw err;
                   console.log('数据追加成功')
               });
